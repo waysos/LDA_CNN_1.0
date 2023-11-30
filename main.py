@@ -113,10 +113,10 @@ def main():
     # 构建词袋模型
     dictionary = corpora.Dictionary(finall_data)
     corpus = [dictionary.doc2bow(text) for text in finall_data]
-    # print(dictionary.token2id) # 得到每个词编号 # LDA特征矩阵怎么获得？
+    # print(dictionary.token2id) # 得到每个词编号
 
     # 标签
-    csv_reader = csv.reader(open("lda_topics.csv"))
+    csv_reader = csv.reader(open("lda_topics_7.csv")) # csv_reader = csv.reader(open("lda_topics.csv"))
     i = 0
     for row in csv_reader:
         if i % 2 == 0:
@@ -169,9 +169,9 @@ def main():
     print(testSeq)
 
     # 标签独热编码 转换为one-hot编码
-    trainCate = to_categorical(y_train, num_classes=2)  # 二分类问题
+    trainCate = to_categorical(y_train, num_classes=7) # trainCate = to_categorical(y_train, num_classes=2)
     print(trainCate)
-    testCate = to_categorical(y_test, num_classes=2)  # 二分类问题
+    testCate = to_categorical(y_test, num_classes=7)  # testCate = to_categorical(y_test, num_classes=2)
     print(testCate)
 
     # ----------------------------------第四步 CNN构建--------------------------------
@@ -186,8 +186,8 @@ def main():
             continue
 
     # 训练模型
-    main_input = Input(shape=(maxLen,), dtype='float64')
-    # 词嵌入 使用预训练Word2Vec的词向量 自定义权重矩阵 100是输出词向量维度
+    main_input = Input(shape=(maxLen,), dtype='float64') # 初始化深度学习网络输入层的tensor(一个多维数组) shape表示输入将是一个maxLen维的向量
+    # 词嵌入 使用预训练Word2Vec的词向量 自定义权重矩阵 100是输出词向量维度 # 由于传统模型(词袋模型)产生的词向量大而稀疏，词嵌入是对传统模型的改进
     embedder = Embedding(len(vocab) + 1, 100, input_length=maxLen,
                          weights=[embedding_matrix], trainable=False)  # 不再训练
     # 建立模型
@@ -200,7 +200,7 @@ def main():
     model_cnn.add(Dropout(0.3))  # 防止过拟合 30%不训练
     model_cnn.add(Dense(256, activation='relu'))  # 全连接层
     model_cnn.add(Dropout(0.2))  # 防止过拟合
-    model_cnn.add(Dense(units=2, activation='softmax'))  # 输出层
+    model_cnn.add(Dense(units=7, activation='softmax'))  # 输出层 model_cnn.add(Dense(units=2, activation='softmax'))
 
     # 模型可视化
     model_cnn.summary()
