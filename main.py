@@ -169,7 +169,7 @@ def main():
     print(testSeq)
 
     # 标签独热编码 转换为one-hot编码
-    trainCate = to_categorical(y_train, num_classes=7) # trainCate = to_categorical(y_train, num_classes=2)
+    trainCate = to_categorical(y_train, num_classes=7)  # trainCate = to_categorical(y_train, num_classes=2)
     print(trainCate)
     testCate = to_categorical(y_test, num_classes=7)  # testCate = to_categorical(y_test, num_classes=2)
     print(testCate)
@@ -187,18 +187,18 @@ def main():
 
     # 训练模型
     main_input = Input(shape=(maxLen,), dtype='float64') # 初始化深度学习网络输入层的tensor(一个多维数组) shape表示输入将是一个maxLen维的向量
-    # 词嵌入 使用预训练Word2Vec的词向量 自定义权重矩阵 100是输出词向量维度 # 由于传统模型(词袋模型)产生的词向量大而稀疏，词嵌入是对传统模型的改进
+    # 词嵌入 使用预训练Word2Vec的词向量 自定义权重矩阵 100是输出词向量维度 # 由于传统模型(词袋模型)产生的词向量大而稀疏，词嵌入是对传统模型的改进 # 权重矩阵没准可以改为LDA获取的词语分类或者余弦相似度
     embedder = Embedding(len(vocab) + 1, 100, input_length=maxLen,
                          weights=[embedding_matrix], trainable=False)  # 不再训练
     # 建立模型
     model_cnn = Sequential()
     model_cnn.add(embedder)  # 构建Embedding层
-    model_cnn.add(Conv1D(256, 3, padding='same', activation='relu'))  # 卷积层步幅3
-    model_cnn.add(MaxPool1D(maxLen - 5, 3, padding='same'))  # 池化层
+    model_cnn.add(Conv1D(256, 3, padding='same', activation='relu'))  # 卷积层步幅3 256为输出向量长度或者说为卷积核个数 3为卷积核的长度 卷积核大小为(3,num_features) padding = “same”代表保留边界处的卷积结果，通常会导致输出shape与输入shape相同
+    model_cnn.add(MaxPool1D(maxLen - 5, 3, padding='same'))  # 池化层 依次为最大池化窗口大小、每次池化步骤中池化窗口移动量
     model_cnn.add(Conv1D(32, 3, padding='same', activation='relu'))  # 卷积层
-    model_cnn.add(Flatten())  # 拉直化
+    model_cnn.add(Flatten())  # 拉直化 Flatten层用来将输入“压平”，即把多维的输入一维化，常用在从卷积层到全连接层的过渡。Flatten不影响batch的大小。
     model_cnn.add(Dropout(0.3))  # 防止过拟合 30%不训练
-    model_cnn.add(Dense(256, activation='relu'))  # 全连接层
+    model_cnn.add(Dense(256, activation='relu'))  # 全连接层 依次为输出空间维度、激活函数
     model_cnn.add(Dropout(0.2))  # 防止过拟合
     model_cnn.add(Dense(units=7, activation='softmax'))  # 输出层 model_cnn.add(Dense(units=2, activation='softmax'))
 
